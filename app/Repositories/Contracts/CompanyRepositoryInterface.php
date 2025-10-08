@@ -12,7 +12,7 @@ interface CompanyRepositoryInterface
     public function getAll(): Collection;
 
   
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator;
+    public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'name', string $orderDirection = 'asc'): LengthAwarePaginator;
 
 
     public function getByUserRole(int $userId, bool $isAdmin, ?int $companyId = null, int $perPage = 15): LengthAwarePaginator;

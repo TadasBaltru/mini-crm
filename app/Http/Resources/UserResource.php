@@ -27,11 +27,13 @@ class UserResource extends JsonResource
             
             'company' => $this->when(
                 $this->relationLoaded('company') && $this->company,
-                fn() => [
-                    'id' => $this->company->id,
-                    'name' => $this->company->name,
-                    'email' => $this->company->email,
-                ]
+                function () {
+                    return [
+                        'id' => $this->company->id,
+                        'name' => $this->company->name,
+                        'email' => $this->company->email,
+                    ];
+                }
             ),
         ];
     }

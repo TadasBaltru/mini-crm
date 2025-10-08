@@ -37,10 +37,68 @@ class UserController extends Controller
         /** @var \App\Models\User $currentUser */
         $currentUser = Auth::user();
 
-        $users = $this->userRepository->getPaginated(15);
+        $search = request('search');
+        $orderBy = request('order_by', 'name');
+        $orderDirection = request('order_direction', 'asc');
+
+        $users = $this->userRepository->getPaginated(
+            15,
+            $search,
+            $orderBy,
+            $orderDirection
+        );
+
+        // Build pagination links
+        $links = [];
+        
+        // Previous link
+        $links[] = [
+            'url' => $users->previousPageUrl(),
+            'label' => '&laquo; Previous',
+            'active' => false,
+        ];
+        
+        // Page number links
+        foreach (range(1, $users->lastPage()) as $page) {
+            $links[] = [
+                'url' => $users->url($page),
+                'label' => (string) $page,
+                'active' => $page === $users->currentPage(),
+            ];
+        }
+        
+        // Next link
+        $links[] = [
+            'url' => $users->nextPageUrl(),
+            'label' => 'Next &raquo;',
+            'active' => false,
+        ];
+        
+        $usersData = collect($users->items())->map(function ($user) {
+            return (new UserResource($user))->toArray(request());
+        })->values()->all();
 
         return Inertia::render('Users/Index', [
-            'users' => UserResource::collection($users),
+            'users' => [
+                'data' => $usersData,
+                'links' => $links,
+                'current_page' => $users->currentPage(),
+                'first_page_url' => $users->url(1),
+                'from' => $users->firstItem() ?? 0,
+                'last_page' => $users->lastPage(),
+                'last_page_url' => $users->url($users->lastPage()),
+                'next_page_url' => $users->nextPageUrl(),
+                'path' => $users->path(),
+                'per_page' => $users->perPage(),
+                'prev_page_url' => $users->previousPageUrl(),
+                'to' => $users->lastItem() ?? 0,
+                'total' => $users->total(),
+            ],
+            'filters' => [
+                'search' => $search,
+                'order_by' => $orderBy,
+                'order_direction' => $orderDirection,
+            ],
             'can' => [
                 'create' => $currentUser->can('create', User::class),
             ],

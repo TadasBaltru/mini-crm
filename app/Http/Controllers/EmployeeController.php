@@ -31,7 +31,7 @@ class EmployeeController extends Controller
         $this->companyRepository = $companyRepository;
     }
 
- 
+  
     public function index(): Response
     {
         $this->authorize('viewAny', Employee::class);
@@ -39,14 +39,68 @@ class EmployeeController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         
-        $employees = $this->employeeRepository->getByUserRole(
-            $user->isAdmin(),
-            $user->company_id,
-            15
+        $search = request('search');
+        $orderBy = request('order_by', 'first_name');
+        $orderDirection = request('order_direction', 'asc');
+        
+        $employees = $this->employeeRepository->getPaginated(
+            15,
+            $search,
+            $orderBy,
+            $orderDirection
         );
 
+        // Build pagination links
+        $links = [];
+        
+        // Previous link
+        $links[] = [
+            'url' => $employees->previousPageUrl(),
+            'label' => '&laquo; Previous',
+            'active' => false,
+        ];
+        
+        // Page number links
+        foreach (range(1, $employees->lastPage()) as $page) {
+            $links[] = [
+                'url' => $employees->url($page),
+                'label' => (string) $page,
+                'active' => $page === $employees->currentPage(),
+            ];
+        }
+        
+        // Next link
+        $links[] = [
+            'url' => $employees->nextPageUrl(),
+            'label' => 'Next &raquo;',
+            'active' => false,
+        ];
+        
+        $employeesData = collect($employees->items())->map(function ($employee) {
+            return (new EmployeeResource($employee))->toArray(request());
+        })->values()->all();
+
         return Inertia::render('Employees/Index', [
-            'employees' => EmployeeResource::collection($employees),
+            'employees' => [
+                'data' => $employeesData,
+                'links' => $links,
+                'current_page' => $employees->currentPage(),
+                'first_page_url' => $employees->url(1),
+                'from' => $employees->firstItem() ?? 0,
+                'last_page' => $employees->lastPage(),
+                'last_page_url' => $employees->url($employees->lastPage()),
+                'next_page_url' => $employees->nextPageUrl(),
+                'path' => $employees->path(),
+                'per_page' => $employees->perPage(),
+                'prev_page_url' => $employees->previousPageUrl(),
+                'to' => $employees->lastItem() ?? 0,
+                'total' => $employees->total(),
+            ],
+            'filters' => [
+                'search' => $search,
+                'order_by' => $orderBy,
+                'order_direction' => $orderDirection,
+            ],
             'can' => [
                 'create' => $user->can('create', Employee::class),
             ],

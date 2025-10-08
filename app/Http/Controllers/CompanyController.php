@@ -24,7 +24,7 @@ class CompanyController extends Controller
         $this->companyRepository = $companyRepository;
     }
 
-
+ 
     public function index(): Response
     {
         $this->authorize('viewAny', Company::class);
@@ -32,15 +32,68 @@ class CompanyController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         
-        $companies = $this->companyRepository->getByUserRole(
-            $user->id,
-            $user->isAdmin(),
-            $user->company_id,
-            15
+        $search = request('search');
+        $orderBy = request('order_by', 'name');
+        $orderDirection = request('order_direction', 'asc');
+        
+        $companies = $this->companyRepository->getPaginated(
+            15,
+            $search,
+            $orderBy,
+            $orderDirection
         );
 
+        // Build pagination links
+        $links = [];
+        
+        // Previous link
+        $links[] = [
+            'url' => $companies->previousPageUrl(),
+            'label' => '&laquo; Previous',
+            'active' => false,
+        ];
+        
+        // Page number links
+        foreach (range(1, $companies->lastPage()) as $page) {
+            $links[] = [
+                'url' => $companies->url($page),
+                'label' => (string) $page,
+                'active' => $page === $companies->currentPage(),
+            ];
+        }
+        
+        // Next link
+        $links[] = [
+            'url' => $companies->nextPageUrl(),
+            'label' => 'Next &raquo;',
+            'active' => false,
+        ];
+        
+        $companiesData = collect($companies->items())->map(function ($company) {
+            return (new CompanyResource($company))->toArray(request());
+        })->values()->all();
+
         return Inertia::render('Companies/Index', [
-            'companies' => CompanyResource::collection($companies),
+            'companies' => [
+                'data' => $companiesData,
+                'links' => $links,
+                'current_page' => $companies->currentPage(),
+                'first_page_url' => $companies->url(1),
+                'from' => $companies->firstItem() ?? 0,
+                'last_page' => $companies->lastPage(),
+                'last_page_url' => $companies->url($companies->lastPage()),
+                'next_page_url' => $companies->nextPageUrl(),
+                'path' => $companies->path(),
+                'per_page' => $companies->perPage(),
+                'prev_page_url' => $companies->previousPageUrl(),
+                'to' => $companies->lastItem() ?? 0,
+                'total' => $companies->total(),
+            ],
+            'filters' => [
+                'search' => $search,
+                'order_by' => $orderBy,
+                'order_direction' => $orderDirection,
+            ],
             'can' => [
                 'create' => $user->can('create', Company::class),
             ],

@@ -2,10 +2,42 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
+import TextInput from '@/Components/TextInput.vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
     users: Object,
+    filters: Object,
     can: Object,
+});
+
+const search = ref(props.filters?.search || '');
+const orderBy = ref(props.filters?.order_by || 'name');
+const orderDirection = ref(props.filters?.order_direction || 'asc');
+
+const searchUsers = () => {
+    router.get(route('users.index'), {
+        search: search.value,
+        order_by: orderBy.value,
+        order_direction: orderDirection.value,
+    }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
+};
+
+const sortBy = (field) => {
+    if (orderBy.value === field) {
+        orderDirection.value = orderDirection.value === 'asc' ? 'desc' : 'asc';
+    } else {
+        orderBy.value = field;
+        orderDirection.value = 'asc';
+    }
+    searchUsers();
+};
+
+watch(search, () => {
+    searchUsers();
 });
 
 const deleteUser = (user) => {
@@ -36,6 +68,16 @@ const deleteUser = (user) => {
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6 text-gray-900">
+                        <!-- Search Bar -->
+                        <div class="mb-4">
+                            <TextInput
+                                v-model="search"
+                                type="text"
+                                placeholder="Search by name, email or company..."
+                                class="w-full"
+                            />
+                        </div>
+
                         <div v-if="users.data.length === 0" class="text-center py-8 text-gray-500">
                             No users found.
                         </div>
@@ -44,17 +86,26 @@ const deleteUser = (user) => {
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                            Name
+                                        <th @click="sortBy('name')" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-gray-100">
+                                            <div class="flex items-center gap-1">
+                                                Name
+                                                <span v-if="orderBy === 'name'">{{ orderDirection === 'asc' ? '↑' : '↓' }}</span>
+                                            </div>
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                            Email
+                                        <th @click="sortBy('email')" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-gray-100">
+                                            <div class="flex items-center gap-1">
+                                                Email
+                                                <span v-if="orderBy === 'email'">{{ orderDirection === 'asc' ? '↑' : '↓' }}</span>
+                                            </div>
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                             Role
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
-                                            Company
+                                        <th @click="sortBy('company')" class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-gray-100">
+                                            <div class="flex items-center gap-1">
+                                                Company
+                                                <span v-if="orderBy === 'company'">{{ orderDirection === 'asc' ? '↑' : '↓' }}</span>
+                                            </div>
                                         </th>
                                         <th class="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
                                             Actions
@@ -106,21 +157,41 @@ const deleteUser = (user) => {
                             </table>
                             
                             <!-- Pagination -->
-                            <div v-if="users.links.length > 3" class="mt-4 flex justify-center space-x-1">
-                                <Link
-                                    v-for="(link, index) in users.links"
-                                    :key="index"
-                                    :href="link.url"
-                                    :class="[
-                                        'px-4 py-2 text-sm border rounded',
-                                        link.active
-                                            ? 'bg-indigo-600 text-white border-indigo-600'
-                                            : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50',
-                                        !link.url ? 'opacity-50 cursor-not-allowed' : ''
-                                    ]"
-                                    v-html="link.label"
-                                    :disabled="!link.url"
-                                />
+                            <div v-if="users.links && users.links.length > 3" class="mt-6 border-t border-gray-200 pt-4">
+                                <div class="flex items-center justify-between">
+                                    <!-- Pagination Info -->
+                                    <div class="text-sm text-gray-700">
+                                        Showing 
+                                        <span class="font-medium">{{ users.from || 0 }}</span>
+                                        to 
+                                        <span class="font-medium">{{ users.to || 0 }}</span>
+                                        of 
+                                        <span class="font-medium">{{ users.total || 0 }}</span>
+                                        results
+                                    </div>
+                                    
+                                    <!-- Pagination Links -->
+                                    <div class="flex space-x-1">
+                                        <component
+                                            :is="link.url ? Link : 'span'"
+                                            v-for="(link, index) in users.links"
+                                            :key="index"
+                                            :href="link.url"
+                                            preserve-scroll
+                                            preserve-state
+                                            :class="[
+                                                'px-3 py-2 text-sm border rounded-md transition-colors',
+                                                link.active
+                                                    ? 'bg-indigo-600 text-white border-indigo-600 font-semibold'
+                                                    : 'bg-white text-gray-700 border-gray-300',
+                                                link.url && !link.active ? 'hover:bg-gray-50 hover:border-gray-400' : '',
+                                                !link.url ? 'opacity-50 cursor-not-allowed' : ''
+                                            ]"
+                                        >
+                                            <span v-html="link.label"></span>
+                                        </component>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

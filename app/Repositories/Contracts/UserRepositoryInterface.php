@@ -11,7 +11,7 @@ interface UserRepositoryInterface
 
     public function getAll(): Collection;
 
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator;
+    public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'name', string $orderDirection = 'asc'): LengthAwarePaginator;
 
     public function findById(int $id): ?User;
 

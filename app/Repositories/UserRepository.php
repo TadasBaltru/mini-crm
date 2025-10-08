@@ -20,11 +20,34 @@ class UserRepository implements UserRepositoryInterface
     /**
      * Get paginated users.
      */
-    public function getPaginated(int $perPage = 15): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'name', string $orderDirection = 'asc'): LengthAwarePaginator
     {
-        return User::with('company')
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+        $query = User::with('company');
+
+        // Apply search filter
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('company', function ($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // Apply ordering
+        $allowedOrderBy = ['name', 'email', 'created_at'];
+        if ($orderBy === 'company') {
+            $query->leftJoin('companies', 'users.company_id', '=', 'companies.id')
+                  ->select('users.*')
+                  ->orderBy('companies.name', $orderDirection);
+        } elseif (in_array($orderBy, $allowedOrderBy)) {
+            $query->orderBy($orderBy, $orderDirection);
+        } else {
+            $query->orderBy('name', 'asc');
+        }
+
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /**
