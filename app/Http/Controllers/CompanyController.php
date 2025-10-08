@@ -43,52 +43,8 @@ class CompanyController extends Controller
             $orderDirection
         );
 
-        // Build pagination links
-        $links = [];
-        
-        // Previous link
-        $links[] = [
-            'url' => $companies->previousPageUrl(),
-            'label' => '&laquo; Previous',
-            'active' => false,
-        ];
-        
-        // Page number links
-        foreach (range(1, $companies->lastPage()) as $page) {
-            $links[] = [
-                'url' => $companies->url($page),
-                'label' => (string) $page,
-                'active' => $page === $companies->currentPage(),
-            ];
-        }
-        
-        // Next link
-        $links[] = [
-            'url' => $companies->nextPageUrl(),
-            'label' => 'Next &raquo;',
-            'active' => false,
-        ];
-        
-        $companiesData = collect($companies->items())->map(function ($company) {
-            return (new CompanyResource($company))->toArray(request());
-        })->values()->all();
-
         return Inertia::render('Companies/Index', [
-            'companies' => [
-                'data' => $companiesData,
-                'links' => $links,
-                'current_page' => $companies->currentPage(),
-                'first_page_url' => $companies->url(1),
-                'from' => $companies->firstItem() ?? 0,
-                'last_page' => $companies->lastPage(),
-                'last_page_url' => $companies->url($companies->lastPage()),
-                'next_page_url' => $companies->nextPageUrl(),
-                'path' => $companies->path(),
-                'per_page' => $companies->perPage(),
-                'prev_page_url' => $companies->previousPageUrl(),
-                'to' => $companies->lastItem() ?? 0,
-                'total' => $companies->total(),
-            ],
+            'companies' => CompanyResource::collection($companies),
             'filters' => [
                 'search' => $search,
                 'order_by' => $orderBy,
