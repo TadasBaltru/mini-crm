@@ -3,64 +3,50 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules;
 
 class UserStoreRequest extends FormRequest
 {
-  
     public function authorize(): bool
     {
         return true;
     }
-
 
     public function rules(): array
     {
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-            'role' => ['required', Rule::in(['admin', 'company'])],
-            'company_id' => 'nullable|exists:companies,id',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'role' => 'required|in:admin,company',
+            'company_id' => 'required_if:role,company|nullable|exists:companies,id',
         ];
     }
 
-
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            // Ensure admin users don't have a company_id
-            if ($this->input('role') === 'admin' && $this->input('company_id')) {
-                $validator->errors()->add('company_id', 'Admin users cannot be assigned to a company.');
-            }
-
-            // Ensure company users have a company_id
-            if ($this->input('role') === 'company' && !$this->input('company_id')) {
-                $validator->errors()->add('company_id', 'Company users must be assigned to a company.');
-            }
-        });
-    }
-
-
+    /**
+     * Get custom messages for validator errors.
+     */
     public function messages(): array
     {
         return [
             'name.required' => 'User name is required.',
             'name.max' => 'User name may not be greater than 255 characters.',
-            'email.required' => 'User email is required.',
-            'email.email' => 'User email must be a valid email address.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'Email must be a valid email address.',
             'email.unique' => 'This email address is already registered.',
-            'email.max' => 'User email may not be greater than 255 characters.',
+            'email.max' => 'Email may not be greater than 255 characters.',
             'password.required' => 'Password is required.',
-            'password.min' => 'Password must be at least 8 characters.',
             'password.confirmed' => 'Password confirmation does not match.',
             'role.required' => 'User role is required.',
-            'role.in' => 'User role must be either admin or company.',
+            'role.in' => 'Role must be either admin or company.',
+            'company_id.required_if' => 'Company is required for company users.',
             'company_id.exists' => 'The selected company does not exist.',
         ];
     }
 
-
+    /**
+     * Get custom attributes for validator errors.
+     */
     public function attributes(): array
     {
         return [
@@ -70,5 +56,16 @@ class UserStoreRequest extends FormRequest
             'role' => 'user role',
             'company_id' => 'company',
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // If role is admin, remove company_id
+        if ($this->role === 'admin') {
+            $this->merge(['company_id' => null]);
+        }
     }
 }

@@ -33,7 +33,7 @@ const user = computed(() => page.props.auth.user);
                 </div>
 
                 <!-- Quick Links -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <!-- Companies Card -->
                     <Link :href="route('companies.index')" class="block">
                         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-shadow duration-200">
@@ -73,6 +73,29 @@ const user = computed(() => page.props.auth.user);
                                         </h4>
                                         <p class="mt-1 text-sm text-gray-600">
                                             Manage employee records
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </Link>
+
+                    <!-- Users Card (Admin Only) -->
+                    <Link v-if="user.role === 'admin'" :href="route('users.index')" class="block">
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg hover:shadow-lg transition-shadow duration-200">
+                            <div class="p-6">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
+                                        <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="ml-5">
+                                        <h4 class="text-lg font-semibold text-gray-900">
+                                            Users
+                                        </h4>
+                                        <p class="mt-1 text-sm text-gray-600">
+                                            Manage user accounts
                                         </p>
                                     </div>
                                 </div>

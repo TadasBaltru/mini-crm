@@ -4,8 +4,10 @@ namespace App\Providers;
 
 use App\Models\Company;
 use App\Models\Employee;
+use App\Models\User;
 use App\Policies\CompanyPolicy;
 use App\Policies\EmployeePolicy;
+use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\ServiceProvider;
@@ -27,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
             \App\Repositories\Contracts\EmployeeRepositoryInterface::class,
             \App\Repositories\EmployeeRepository::class
         );
+
+        $this->app->bind(
+            \App\Repositories\Contracts\UserRepositoryInterface::class,
+            \App\Repositories\UserRepository::class
+        );
     }
 
     /**
@@ -39,5 +46,6 @@ class AppServiceProvider extends ServiceProvider
         // Register policies
         Gate::policy(Company::class, CompanyPolicy::class);
         Gate::policy(Employee::class, EmployeePolicy::class);
+        Gate::policy(User::class, UserPolicy::class);
     }
 }
