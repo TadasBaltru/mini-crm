@@ -6,6 +6,7 @@ use App\Http\Requests\EmployeeStoreRequest;
 use App\Http\Requests\EmployeeUpdateRequest;
 use App\Http\Resources\EmployeeResource;
 use App\Http\Resources\CompanyResource;
+use App\Mail\EmployeeCreated;
 use App\Models\Employee;
 use App\Models\Company;
 use App\Repositories\Contracts\EmployeeRepositoryInterface;
@@ -13,6 +14,7 @@ use App\Repositories\Contracts\CompanyRepositoryInterface;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -106,9 +108,12 @@ class EmployeeController extends Controller
 
         $employee = $this->employeeRepository->create($data);
 
+        // Send email notification to the company
+        Mail::to($company->email)->send(new EmployeeCreated($employee, $company));
+
         return redirect()
             ->route('employees.index')
-            ->with('success', 'Employee created successfully.');
+            ->with('success', 'Employee created successfully. Notification email sent to ' . $company->email);
     }
 
 
