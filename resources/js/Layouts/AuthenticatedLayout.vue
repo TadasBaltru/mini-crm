@@ -5,6 +5,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import NavLink from '@/Components/NavLink.vue';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink.vue';
+import FlashMessage from '@/Components/FlashMessage.vue';
 import { Link } from '@inertiajs/vue3';
 
 const showingNavigationDropdown = ref(false);
@@ -12,6 +13,7 @@ const showingNavigationDropdown = ref(false);
 
 <template>
     <div>
+        <FlashMessage />
         <div class="min-h-screen bg-gray-100">
             <nav
                 class="border-b border-gray-100 bg-white"
@@ -38,6 +40,18 @@ const showingNavigationDropdown = ref(false);
                                     :active="route().current('dashboard')"
                                 >
                                     Dashboard
+                                </NavLink>
+                                <NavLink
+                                    :href="route('companies.index')"
+                                    :active="route().current('companies.*')"
+                                >
+                                    Companies
+                                </NavLink>
+                                <NavLink
+                                    :href="route('employees.index')"
+                                    :active="route().current('employees.*')"
+                                >
+                                    Employees
                                 </NavLink>
                             </div>
                         </div>
@@ -145,6 +159,18 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('companies.index')"
+                            :active="route().current('companies.*')"
+                        >
+                            Companies
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            :href="route('employees.index')"
+                            :active="route().current('employees.*')"
+                        >
+                            Employees
                         </ResponsiveNavLink>
                     </div>
 
