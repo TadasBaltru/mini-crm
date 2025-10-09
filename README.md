@@ -316,8 +316,6 @@ mini-crm/
 ### Test the Application
 
 ```bash
-# Reset database with fresh test data
-php artisan migrate:fresh --seed
 
 # Login with test credentials
 Email: admin@minicrm.com
@@ -336,19 +334,6 @@ Password: password
 ---
 
 ### Development
-
-```bash
-# Start servers
-php artisan serve              # Laravel (http://localhost:8000)
-npm run dev                    # Vite with HMR
-
-# Database
-php artisan migrate            # Run migrations
-php artisan migrate:fresh      # Fresh migration
-php artisan db:seed            # Seed database
-php artisan migrate:fresh --seed
-
-## 🌟 Credits
 
 Built with:
 - [Laravel](https://laravel.com) - PHP Framework
