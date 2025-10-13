@@ -24,15 +24,15 @@ class EmployeeResource extends JsonResource
             // Include company relationship if loaded
             'company' => $this->when(
                 $this->relationLoaded('company'),
-                fn() => [
-                    'id' => $this->company->id,
-                    'name' => $this->company->name,
-                    'email' => $this->company->email,
-                    'website' => $this->company->website,
-                ]
+                fn() => new CompanyResource($this->company)
             ),
         ];
     }
 }
+
+
+
+
+
 
 

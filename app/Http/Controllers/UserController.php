@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UserStoreRequest;
 use App\Http\Requests\UserUpdateRequest;
 use App\Http\Resources\UserResource;
+use App\Http\Resources\CompanyResource;
 use App\Models\User;
 use App\Repositories\Contracts\UserRepositoryInterface;
 use App\Repositories\Contracts\CompanyRepositoryInterface;
@@ -68,10 +69,7 @@ class UserController extends Controller
         $companies = $this->companyRepository->getAll();
 
         return Inertia::render('Users/Create', [
-            'companies' => $companies->map(fn($company) => [
-                'id' => $company->id,
-                'name' => $company->name,
-            ])->toArray(),
+            'companies' => CompanyResource::collection($companies),
         ]);
     }
 
@@ -106,20 +104,7 @@ class UserController extends Controller
         $currentUser = Auth::user();
 
         return Inertia::render('Users/Show', [
-            'user' => [
-                'id' => $userData->id,
-                'name' => $userData->name,
-                'email' => $userData->email,
-                'role' => $userData->role,
-                'company_id' => $userData->company_id,
-                'company' => $userData->company ? [
-                    'id' => $userData->company->id,
-                    'name' => $userData->company->name,
-                    'email' => $userData->company->email,
-                ] : null,
-                'created_at' => $userData->created_at->format('Y-m-d H:i:s'),
-                'updated_at' => $userData->updated_at->format('Y-m-d H:i:s'),
-            ],
+            'user' => new UserResource($userData),
             'can' => [
                 'update' => $currentUser->can('update', $user),
                 'delete' => $currentUser->can('delete', $user),
@@ -134,17 +119,8 @@ class UserController extends Controller
         $companies = $this->companyRepository->getAll();
 
         return Inertia::render('Users/Edit', [
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'role' => $user->role,
-                'company_id' => $user->company_id,
-            ],
-            'companies' => $companies->map(fn($company) => [
-                'id' => $company->id,
-                'name' => $company->name,
-            ])->toArray(),
+            'user' => new UserResource($user),
+            'companies' => CompanyResource::collection($companies),
         ]);
     }
 
