@@ -11,17 +11,18 @@ const props = defineProps({
     employee: Object,
     companies: Array,
 });
+const employee = props.employee.data ?? props.employee;
 
 const form = useForm({
-    first_name: props.employee.first_name,
-    last_name: props.employee.last_name,
-    email: props.employee.email,
-    phone: props.employee.phone,
-    company_id: props.employee.company_id,
+    first_name: employee.first_name,
+    last_name: employee.last_name,
+    email: employee.email,
+    phone: employee.phone,
+    company_id: employee.company_id,
 });
 
 const submit = () => {
-    form.put(route('employees.update', props.employee.id), {
+    form.put(route('employees.update', employee.id), {
         preserveScroll: true,
     });
 };

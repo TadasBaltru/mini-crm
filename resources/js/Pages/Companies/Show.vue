@@ -8,6 +8,7 @@ const props = defineProps({
     company: Object,
     can: Object,
 });
+const company = props.company.data ?? props.company;
 </script>
 
 <template>

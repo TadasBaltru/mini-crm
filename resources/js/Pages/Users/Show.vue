@@ -8,6 +8,7 @@ const props = defineProps({
     user: Object,
     can: Object,
 });
+const user = props.user.data ?? props.user;
 </script>
 
 <template>

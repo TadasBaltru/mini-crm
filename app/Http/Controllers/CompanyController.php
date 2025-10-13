@@ -44,7 +44,7 @@ class CompanyController extends Controller
         );
 
         return Inertia::render('Companies/Index', [
-            'companies' => CompanyResource::collection($companies),
+            'companies' => $companies,
             'filters' => [
                 'search' => $search,
                 'order_by' => $orderBy,
@@ -86,15 +86,7 @@ class CompanyController extends Controller
         $user = Auth::user();
 
         return Inertia::render('Companies/Show', [
-            'company' => [
-                'id' => $company->id,
-                'name' => $company->name,
-                'email' => $company->email,
-                'website' => $company->website,
-                'employees_count' => $company->employees()->count(),
-                'created_at' => $company->created_at->format('Y-m-d H:i:s'),
-                'updated_at' => $company->updated_at->format('Y-m-d H:i:s'),
-            ],
+            'company' => new CompanyResource($company),
             'can' => [
                 'update' => $user->can('update', $company),
                 'delete' => $user->can('delete', $company),
@@ -108,12 +100,7 @@ class CompanyController extends Controller
         $this->authorize('update', $company);
 
         return Inertia::render('Companies/Edit', [
-            'company' => [
-                'id' => $company->id,
-                'name' => $company->name,
-                'email' => $company->email,
-                'website' => $company->website,
-            ],
+            'company' => new CompanyResource($company)
         ]);
     }
 

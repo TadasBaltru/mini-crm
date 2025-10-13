@@ -8,6 +8,7 @@ const props = defineProps({
     employee: Object,
     can: Object,
 });
+const employee = props.employee.data ?? props.employee;
 </script>
 
 <template>

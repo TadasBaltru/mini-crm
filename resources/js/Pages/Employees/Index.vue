@@ -11,6 +11,7 @@ const props = defineProps({
     filters: Object,
     can: Object,
 });
+console.log(props.employees);
 
 const search = ref(props.filters?.search || '');
 const orderBy = ref(props.filters?.order_by || 'first_name');
@@ -42,7 +43,7 @@ watch(search, () => {
 });
 
 const deleteEmployee = (employee) => {
-    if (confirm(`Are you sure you want to delete ${employee.full_name}?`)) {
+    if (confirm(`Are you sure you want to delete ${employee.first_name} ${employee.last_name}?`)) {
         router.delete(route('employees.destroy', employee.id), {
             preserveScroll: true,
         });
@@ -117,7 +118,7 @@ const deleteEmployee = (employee) => {
                                     <tr v-for="employee in employees.data" :key="employee.id" class="hover:bg-gray-50">
                                         <td class="whitespace-nowrap px-6 py-4">
                                             <Link :href="route('employees.show', employee.id)" class="text-indigo-600 hover:text-indigo-900 font-medium">
-                                                {{ employee.full_name }}
+                                                {{ employee.first_name }} {{ employee.last_name }}
                                             </Link>
                                         </td>
                                         <td class="whitespace-nowrap px-6 py-4 text-sm text-gray-900">

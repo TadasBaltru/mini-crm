@@ -51,9 +51,8 @@ class EmployeeController extends Controller
             $orderBy,
             $orderDirection
         );
-
         return Inertia::render('Employees/Index', [
-            'employees' => EmployeeResource::collection($employees),
+            'employees' => $employees,
             'filters' => [
                 'search' => $search,
                 'order_by' => $orderBy,
@@ -127,21 +126,7 @@ class EmployeeController extends Controller
         $user = Auth::user();
 
         return Inertia::render('Employees/Show', [
-            'employee' => [
-                'id' => $employee->id,
-                'first_name' => $employee->first_name,
-                'last_name' => $employee->last_name,
-                'email' => $employee->email,
-                'phone' => $employee->phone,
-                'company_id' => $employee->company_id,
-                'company' => $employee->company ? [
-                    'id' => $employee->company->id,
-                    'name' => $employee->company->name,
-                    'email' => $employee->company->email,
-                ] : null,
-                'created_at' => $employee->created_at->format('Y-m-d H:i:s'),
-                'updated_at' => $employee->updated_at->format('Y-m-d H:i:s'),
-            ],
+            'employee' => new EmployeeResource($employee),
             'can' => [
                 'update' => $user->can('update', $employee),
                 'delete' => $user->can('delete', $employee),
@@ -162,14 +147,7 @@ class EmployeeController extends Controller
             : collect([$user->company]);
 
         return Inertia::render('Employees/Edit', [
-            'employee' => [
-                'id' => $employee->id,
-                'first_name' => $employee->first_name,
-                'last_name' => $employee->last_name,
-                'email' => $employee->email,
-                'phone' => $employee->phone,
-                'company_id' => $employee->company_id,
-            ],
+            'employee' => new EmployeeResource($employee),
             'companies' => $companies->map(fn($company) => [
                 'id' => $company->id,
                 'name' => $company->name,

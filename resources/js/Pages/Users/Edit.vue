@@ -12,14 +12,15 @@ const props = defineProps({
     user: Object,
     companies: Array,
 });
+const user = props.user.data ?? props.user;
 
 const form = useForm({
-    name: props.user.name,
-    email: props.user.email,
+    name: user.name,
+    email: user.email,
     password: '',
     password_confirmation: '',
-    role: props.user.role,
-    company_id: props.user.company_id,
+    role: user.role,
+    company_id: user.company_id,
 });
 
 // Watch role changes to clear company_id if admin is selected
@@ -32,7 +33,7 @@ watch(() => form.role, (newRole) => {
 });
 
 const submit = () => {
-    form.put(route('users.update', props.user.id), {
+    form.put(route('users.update', user.id), {
         preserveScroll: true,
     });
 };

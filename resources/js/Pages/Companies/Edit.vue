@@ -10,15 +10,15 @@ import TextInput from '@/Components/TextInput.vue';
 const props = defineProps({
     company: Object,
 });
-
+const company = props.company.data ?? props.company;
 const form = useForm({
-    name: props.company.name,
-    email: props.company.email,
-    website: props.company.website,
+    name: company.name,
+    email: company.email,
+    website: company.website,
 });
 
 const submit = () => {
-    form.put(route('companies.update', props.company.id), {
+    form.put(route('companies.update', company.id), {
         preserveScroll: true,
     });
 };
