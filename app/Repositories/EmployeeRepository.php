@@ -52,16 +52,6 @@ class EmployeeRepository implements EmployeeRepositoryInterface
         return $query->paginate($perPage)->withQueryString();
     }
 
-
-    public function getByCompany(int $companyId, int $perPage = 15): LengthAwarePaginator
-    {
-        return Employee::with('company')
-            ->where('company_id', $companyId)
-            ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
-    }
-
-
     public function getByUserRole(bool $isAdmin, ?int $companyId = null, int $perPage = 15): LengthAwarePaginator
     {
         $query = Employee::with('company');

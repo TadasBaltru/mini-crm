@@ -37,16 +37,4 @@ class Company extends Model
         return $this->hasMany(User::class);
     }
 
-
-    public function getEmployeeCountAttribute(): int
-    {
-        return $this->employees()->count();
-    }
-
-
-    public function getUserCountAttribute(): int
-    {
-        return $this->users()->count();
-    }
-
 }

@@ -13,9 +13,7 @@ interface EmployeeRepositoryInterface
 
     public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'first_name', string $orderDirection = 'asc', ?int $companyId = null): LengthAwarePaginator;
 
-    public function getByCompany(int $companyId, int $perPage = 15): LengthAwarePaginator;
-
-
+    
     public function getByUserRole(bool $isAdmin, ?int $companyId = null, int $perPage = 15): LengthAwarePaginator;
 
 
