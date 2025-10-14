@@ -16,9 +16,13 @@ class EmployeeRepository implements EmployeeRepositoryInterface
     }
 
 
-    public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'first_name', string $orderDirection = 'asc'): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'first_name', string $orderDirection = 'asc', ?int $companyId = null): LengthAwarePaginator
     {
         $query = Employee::with('company');
+
+        if ($companyId !== null) {
+            $query->where('company_id', $companyId);
+        }
 
         // Apply search filter
         if ($search) {

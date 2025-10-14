@@ -20,9 +20,14 @@ class UserRepository implements UserRepositoryInterface
     /**
      * Get paginated users.
      */
-    public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'name', string $orderDirection = 'asc'): LengthAwarePaginator
+    public function getPaginated(int $perPage = 15, ?string $search = null, ?string $orderBy = 'name', string $orderDirection = 'asc', ?int $companyId = null): LengthAwarePaginator
     {
         $query = User::with('company');
+
+        // Filter by company if user is not admin
+        if ($companyId !== null) {
+            $query->where('company_id', $companyId);
+        }
 
         // Apply search filter
         if ($search) {

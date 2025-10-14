@@ -36,11 +36,14 @@ class CompanyController extends Controller
         $orderBy = request('order_by', 'name');
         $orderDirection = request('order_direction', 'asc');
         
+        $companyId = $user->isAdmin() ? null : $user->company_id;
+        
         $companies = $this->companyRepository->getPaginated(
             15,
             $search,
             $orderBy,
-            $orderDirection
+            $orderDirection,
+            $user->company_id
         );
 
         return Inertia::render('Companies/Index', [

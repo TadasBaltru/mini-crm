@@ -45,12 +45,17 @@ class EmployeeController extends Controller
         $orderBy = request('order_by', 'first_name');
         $orderDirection = request('order_direction', 'asc');
         
+        // Pass company_id only for non-admin users
+        $companyId = $user->isAdmin() ? null : $user->company_id;
+        
         $employees = $this->employeeRepository->getPaginated(
             15,
             $search,
             $orderBy,
-            $orderDirection
+            $orderDirection,
+            $companyId
         );
+        
         return Inertia::render('Employees/Index', [
             'employees' => $employees,
             'filters' => [
@@ -77,11 +82,7 @@ class EmployeeController extends Controller
             : collect([$user->company]);
 
         return Inertia::render('Employees/Create', [
-            'companies' => $companies->map(fn($company) => [
-                'id' => $company->id,
-                'name' => $company->name,
-                'email' => $company->email,
-            ])->toArray(),
+            'companies' => CompanyResource::collection($companies),
         ]);
     }
 
@@ -148,11 +149,7 @@ class EmployeeController extends Controller
 
         return Inertia::render('Employees/Edit', [
             'employee' => new EmployeeResource($employee),
-            'companies' => $companies->map(fn($company) => [
-                'id' => $company->id,
-                'name' => $company->name,
-                'email' => $company->email,
-            ])->toArray(),
+            'companies' => CompanyResource::collection($companies),
         ]);
     }
 
